@@ -5,10 +5,9 @@ using UnityEngine;
 public class ChangeCamera : MonoBehaviour
 {
     public Camera topDownCam;
-    public Animator topToSideAnimator;
+    public Animator topAnimator;
 
     public Camera sideCam;
-    public Animator sideToTopAnimator;
 
     // Start is called before the first frame update
     void Start()
@@ -17,8 +16,7 @@ public class ChangeCamera : MonoBehaviour
         topDownCam.enabled = true;
         sideCam.enabled = false;
 
-        topToSideAnimator = topDownCam.GetComponent<Animator>();
-        sideToTopAnimator = sideCam.GetComponent<Animator>();
+        topAnimator = topDownCam.GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -29,25 +27,27 @@ public class ChangeCamera : MonoBehaviour
             // play animation depending on which camera is on
             if (topDownCam.enabled)
             {
-                topToSideAnimator.Play("ShiftToSide");
-                print("moving to side");
+                topAnimator.CrossFadeInFixedTime("ShiftToSide", 0);
+
+                // wait a second and switch to side camera
+                StartCoroutine(WaitAndSwitch());
             }
             else // sideCam.enabled
             {
-                sideToTopAnimator.Play("ShiftToTop");
-                print("moving up");
-            }
+                //switch back to top camera
+                topDownCam.enabled = true;
+                sideCam.enabled = false;
 
-            // switch view to other camera
-            StartCoroutine(WaitAndSwitchCamera());
+                topAnimator.CrossFadeInFixedTime("ShiftToTop", 0);
+            }
         }
     }
 
-    // Wait one second (length of animation) before switching to other camera
-    IEnumerator WaitAndSwitchCamera()
+    // Wait one second (length of animation) before switching to side camera
+    IEnumerator WaitAndSwitch()
     {
         yield return new WaitForSeconds(1f);
-        topDownCam.enabled = !topDownCam.enabled;
-        sideCam.enabled = !sideCam.enabled;
+        topDownCam.enabled = false;
+        sideCam.enabled = true;
     }
 }
